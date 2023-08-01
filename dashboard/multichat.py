@@ -15,7 +15,7 @@ AVATARS = list({
     '🧪', '🔧', '🌍', '📊', '💼', '⚖️', '👨‍⚕️', '👩‍⚕️', '👷‍♀️', '👷‍♂️', '🎓',
     '👩‍💻', '👨‍💻', '📈', '📊', '🖥️', '💻', '📱', '🧠', '🎯'
 })
-
+DEFAULT_KEY = "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"
 st.set_page_config(
     page_title="MultiTalk - Chat with multiple bots",
 
@@ -62,15 +62,19 @@ bots_col, chat_col = st.columns([1, 3])
 if st.session_state.get('bots') is None:
     # st.session_state.bots = settings_json.dict_by_key('bots', 'id')
     st.session_state.bots = {}
+    
 if st.session_state.get('turns_limit') is None:
     st.session_state.turns_limit = 20
+    
+if st.session_state.get('api_key') is None:
+    st.session_state.api_key = ''
 
-
-
+if st.session_state.get('init_message') is None:
+    st.session_state.init_message = ''
 
 def bot_id(bot):
     # hash bot by all fields except key:
-    return hash(json.dumps({k: v for k, v in bot.items() if k != 'key'}))
+    return hash(json.dumps({k: v for k, v in bot.items()}))
 
 st.session_state.bot_key = ''
 ADD_BOT = False
@@ -87,25 +91,36 @@ with bots_col:
             bots = content.get('bots', {})
             for bot in bots:
                 bot['id'] = bot_id(bot)
+                if not bot.get('avatar'):
+                    bot['avatar'] = '👤'
+                if bot['avatar'] not in AVATARS:
+                    AVATARS.append(bot['avatar'])
+                    
             bots = {bot['id']: bot for bot in bots}
             st.session_state.bots.update(bots)
             st.session_state.turns_limit = st.session_state.turns_limit or content.get('turns_limit', 20)
+            st.session_state.api_key = st.session_state.api_key or content.get('api_key', '')
+            # st.session_state.init_message = st.session_state.init_message or content.get('init_message', '')
             print('uploaded bots: ', bots)
+            uploaded_file = None
 
 
     
     st.session_state.turns_limit = st.number_input('Лимит сообщений', value=st.session_state.turns_limit, step=1)
-
+    st.session_state.api_key = st.text_input('Ключ', value=st.session_state.api_key, type='password')
+    
     if st.session_state.get('bots') is not None:
         for i, bot in enumerate(st.session_state.bots.values()):
 
-            with st.expander(f"{bot['name']} ({bot['id']})", expanded=bot.get('expanded', False)):
-                row=st.columns([3, 1])
+            with st.expander(f"{bot['avatar']} {bot['name']} ({bot['id']})", expanded=bot.get('expanded', False)):
+                if bot['avatar'] not in AVATARS:
+                    AVATARS.append(bot['avatar'])
+                form = st.form(key=f"bot_form_{bot['id']}")
+                row=form.columns([3, 1])
                 bot['name']=row[0].text_input('Имя', value=bot['name'], key=f"{bot['id']}_name")
                 bot['avatar']=row[1].selectbox('Аватар', AVATARS, index=AVATARS.index(bot['avatar']), key=f"{bot['id']}_avatar")
-                bot['description']=st.text_area('Промпт', value=bot['description'], key=f"{bot['id']}_description")
-                
-                row2 = st.columns(2)
+                bot['description']=form.text_area('Промпт', value=bot['description'], key=f"{bot['id']}_description")
+                row2 = form.columns(2)
                 bot['temperature']=row2[0].slider('Температура', 0.0, 2.0, value=bot['temperature'], step=0.01, key=f"{bot['id']}_temperature")
                 bot['model']=row2[1].selectbox(
                     'Модель',
@@ -115,19 +130,26 @@ with bots_col:
                     key=f"{bot['id']}_model",
                 )
                 
-                row3 = st.columns([6,1])
-                bot['key']=row3[0].text_input('Ключ', value=bot['key'], type='password', key=f"{bot['id']}_key")
+                row3 = form.columns([6,1])
+            
+                if row3[0].form_submit_button('Сохранить'):
+                    bot['expanded'] = True
+                    st.session_state.bots[bot['id']] = {
+                        'id': bot['id'],
+                        **bot,
+                    }
+                    # reload page:
+                    st.experimental_rerun()
                 
-                if row3[1].button('❌', key=f"{bot['id']}_delete"):
+                if row3[1].form_submit_button('❌'):
                     del st.session_state.bots[bot['id']]
                     # reload page:
                     st.experimental_rerun()
                 
                 
-    if st.button('➕'):
+    if st.button('Добавить бота ➕'):
         new_bot = {
-            'name': '[Новый бот]',
-            'key': '',
+            'name': 'Новый бот ' + str(len(st.session_state.bots) + 1),
             'description': '',
             'temperature': 0.85,
             'model': 'gpt-3.5-turbo-16k',
@@ -144,7 +166,7 @@ with bots_col:
         st.experimental_rerun()
         
     # clear messages:
-    if st.button('🗑️'):
+    if st.button('Очистить историю 🗑️'):
         if st.button('Точно удалить историю чата?'):
             st.session_state.messages = []
             # reload page:
@@ -161,6 +183,7 @@ with bots_col:
                 data='\n'.join(all_history),
                 file_name='all_chat_history.txt',
                 mime='application/txt',
+                key='all_history',
             )
             # json by bot:
             for bot in st.session_state.bots.values():
@@ -170,7 +193,7 @@ with bots_col:
                     data='\n'.join(bot_history),
                     file_name=f"{bot['name']}.txt",
                     mime='application/txt',
-
+                    key=f"{bot['id']}_history",
                 )
     
     st.download_button(
@@ -179,6 +202,8 @@ with bots_col:
             {
                 'bots': list(st.session_state.bots.values()),
                 'turns_limit': st.session_state.turns_limit,
+                'api_key': st.session_state.api_key,
+                # 'init_message': st.session_state.init_message,
             },
             indent=2, ensure_ascii=False),
         file_name='settings.json',
@@ -263,13 +288,14 @@ class MultiChatStatelessProvider:
                 debug=False,
                 temperature=recepient_bot['temperature'],
                 model=recepient_bot['model'],
-                api_key=recepient_bot['key'],
+                api_key=st.session_state.api_key or DEFAULT_KEY,
             )
 
             # response regex must match this string:'[BOT NAME]: "RESPONSE"'
             
             if not re.match(rf'\[{recepient_bot["name"]}\]:\s*".*"', response):
                 print('response regex must match this string:' + rf'\[{recepient_bot["name"]}\]:\s*".*"')
+                print('response:', response)
                 continue
             self.messages.append({
                 'sender': recepient_bot,
@@ -304,9 +330,8 @@ with chat_col:
 
             st.write(f"{message['text']}")
 
-
-if init_message := st.chat_input("Начните диалог, задав вопрос или поставив задачу"):
-
+init_message = st.chat_input("Начните диалог, задав вопрос или поставив задачу")
+if init_message:
     with chat_col.chat_message(name=user_data.get('name'), avatar=user_data.get('avatar')):
         st.markdown(init_message)
 
