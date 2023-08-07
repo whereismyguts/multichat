@@ -246,8 +246,8 @@ def get_response(
             api_key=api_key or CLAUDE_KEY,
         )
 
-    if api_key:
-        openai.api_key = api_key or GPT_KEY
+    # if api_key:
+    openai.api_key = api_key or GPT_KEY
     # print('messages')
     # print(messages)
     # print('prompt: ', prompt)
