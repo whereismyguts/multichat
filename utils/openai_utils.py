@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 import json
-# import tiktoken
-# import backoff
+import tiktoken
+import backoff
 import openai
 import requests
 import dotenv
