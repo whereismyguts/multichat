@@ -6,6 +6,7 @@ import json
 import openai
 import requests
 import dotenv
+import os
 dotenv.load_dotenv(dotenv.find_dotenv())
 GPT_KEY = os.getenv('GPT_KEY')
 CLAUDE_KEY = os.getenv('CLAUDE_KEY')
