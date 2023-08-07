@@ -1,0 +1,7 @@
+streamlit
+requests
+openai
+backoff
+tiktoken
+python-dotenv
+pydantic

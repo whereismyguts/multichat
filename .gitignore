@@ -1,0 +1,7 @@
+prod/
+
+/*
+!/dashboard/
+!requirements.txt
+!/presets/
+!.gitignore
