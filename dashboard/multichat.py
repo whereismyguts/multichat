@@ -291,16 +291,18 @@ class MultiChatStatelessProvider:
 
         _messages = []
         if 'gpt' in recepient_bot['model']:
-            curernt_role = 'user'
+            # curernt_role = 'user'
             for message in self.messages:
-                print(message['sender'])
-                _messages.append({
-                    'role': curernt_role,
-                    'content': message['text'],
-                })
-                curernt_role = 'user' if curernt_role == 'assistant' else 'assistant'
+                # print(message['sender'])
+                _messages.append(f"[{message['sender']['name']}]: {message['text']}")
+                # curernt_role = 'user' if curernt_role == 'assistant' else 'assistant'
                 # curernt_role = 'user' if curernt_role.lower() == 'assistant' else 'assistant'
             prompt += f"\nНачни свой ответ с имени твоего пресонажа в квадратных скобках, вот так:\n`[{recepient_bot['name']}]: <текст_ответа>`"
+            _messages.append({
+                'role': 'user',
+                'content': '\n'.join(_messages),
+            })
+
         elif 'claude' in recepient_bot['model']:
             _messages = [{
                 'role': message['sender']['name'],
