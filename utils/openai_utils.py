@@ -205,6 +205,8 @@ class ClaudeApi:
         if debug:
             print('CLAUDE API RESPONSE:')
             print(json.dumps(resp, indent=2, ensure_ascii=False))
+        if 'error' in resp:
+            raise Exception(resp[f'{resp["type"]}: {resp["message"]}'])
         return resp['completion']
 
 
