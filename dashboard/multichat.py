@@ -161,10 +161,10 @@ with bots_col:
     st.divider()
     
     with st.expander('Выбрать пресет ботов и настроек'):
-        files = os.listdir('dashboard\presets')
+        files = os.listdir(os.path.join('dashboard','presets'))
         files_by_name = {}
         for filename in files:
-            with open(f'dashboard\presets\{filename}', 'r', encoding='utf-8') as f:
+            with open(os.path.join('dashboard','presets',filename), 'r', encoding='utf-8') as f:
                 file_content = f.read()
                 json_content = json.loads(file_content)
                 if 'title' not in json_content:
