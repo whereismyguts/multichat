@@ -6,6 +6,7 @@ import re
 import json
 import datetime
 import string
+import traceback
 import random
 sys.path.append(os.getcwd())
 from utils.openai_utils import get_response
@@ -22,8 +23,8 @@ MODELS = [
     'claude-2',
 ]
 
-SYSTEM_PROMPT = '''{description}.\nНе сбивайся с роли, не пиши от лица других участников чата.
-Ответ ожидается в виде прямой речи персонажа, без кавычек и дополнительных комментариев.
+SYSTEM_PROMPT = '''{description}.\nПридерживаясь роли "{role}", напиши только одно сообщение от своего имени, учитывая контекст беседы. 
+Ответ ожидается в виде прямой речи одного персонажа, без кавычек и дополнительных комментариев.
 \n\nОтвет от первого лица, согласно указанной роли в чате ({role}).'''
 
 st.set_page_config(
@@ -214,10 +215,10 @@ with bots_col:
         )
 
     if st.button('Очистить историю 🗑️'):
-        if st.button('Точно удалить историю чата?'):
-            st.session_state.messages = []
-            # reload page:
-            st.experimental_rerun()
+        
+        st.session_state.messages = []
+        # reload page:
+        st.experimental_rerun()
 
     st.download_button(
         label="Экспорт настроек 🛠️",
@@ -298,10 +299,12 @@ class MultiChatStatelessProvider:
                 # curernt_role = 'user' if curernt_role == 'assistant' else 'assistant'
                 # curernt_role = 'user' if curernt_role.lower() == 'assistant' else 'assistant'
             prompt += f"\nНачни свой ответ с имени твоего пресонажа в квадратных скобках, вот так:\n`[{recepient_bot['name']}]: <текст_ответа>`"
-            _messages.append({
-                'role': 'user',
-                'content': '\n'.join(_messages),
-            })
+            _messages = [
+                {
+                    'role': 'user',
+                    'content': '\n'.join(_messages),
+                }
+            ]
 
         elif 'claude' in recepient_bot['model']:
             _messages = [{
@@ -362,7 +365,9 @@ with chat_col:
 
 
 def remove_quotes(txt):  # strip it and removes quotes in the beginning and in the end of the string
-    return txt.strip().strip('"').strip("'")
+    if txt:
+        return txt.strip().strip('"').strip("'")
+    return "🤷‍♂️"
 
 
 init_message = st.chat_input("Начните диалог, задав вопрос или поставив задачу")
@@ -386,12 +391,14 @@ if init_message:
             st.success("Чат завершен!")
             break
         except Exception as e:
+            print(e)
+            print(traceback.format_exc())
             st.error(e)
             break
         with chat_col.chat_message(
             name=msg_iteration['sender']['name'],
             avatar=msg_iteration['sender']['avatar']
         ):
-            st.markdown(f"[{msg_iteration['sender'].get('name')}]: {remove_quotes(msg_iteration['text'])}")
+            st.markdown(f"{msg_iteration['sender'].get('model')}[{msg_iteration['sender'].get('name')}]: {remove_quotes(msg_iteration['text'])}")
         empty_container.markdown(f"## Messages: {len(st.session_state.messages)}")
         # empty_container.write(st.session_state.messages)

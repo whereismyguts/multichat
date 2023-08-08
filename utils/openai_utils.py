@@ -169,13 +169,16 @@ class ClaudeApi:
         #         claude_prompt += f'\n\n{context_info}'
 
         #     claude_prompt += '\n\nContext:' + context_info
-
+        
+        if context_info:
+            claude_prompt += f'\n\n{context_info}\n\n' if context_info else ''
+        
         if messages:
             claude_prompt += '\n\nPrevious messages:'
             for message in messages:
                 claude_prompt += f'\n\n<{claude_role(message["role"])}>: {message["content"]}'
-
-        claude_prompt += f'\n\n{prompt}\n\n' if prompt else ''
+        if prompt:
+            claude_prompt += f'\n\n{prompt}\n\n' if prompt else ''
         claude_prompt += '\n\nAssistant:'
 
         request_obj = {
@@ -248,9 +251,9 @@ def get_response(
 
     # if api_key:
     openai.api_key = api_key or GPT_KEY
-    # print('messages')
-    # print(messages)
-    # print('prompt: ', prompt)
+    print('messages')
+    print(messages)
+    print('prompt: ', prompt)
 
     _messages = messages
     prompt = prompt or PROMPT
