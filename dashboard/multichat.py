@@ -399,6 +399,6 @@ if init_message:
             name=msg_iteration['sender']['name'],
             avatar=msg_iteration['sender']['avatar']
         ):
-            st.markdown(f"{msg_iteration['sender'].get('model')}[{msg_iteration['sender'].get('name')}]: {remove_quotes(msg_iteration['text'])}")
+            st.markdown(f"[{msg_iteration['sender'].get('name')}]: {remove_quotes(msg_iteration['text'])}")
         empty_container.markdown(f"## Messages: {len(st.session_state.messages)}")
         # empty_container.write(st.session_state.messages)
