@@ -68,7 +68,7 @@ user_data = {
     'name': 'User',
     'avatar': '👤'
 }
-st.markdown("# 💡 Мультичат - обсуди что угодно с несколькими ботами")
+st.markdown("# 💡 Мультичат - обсуди что угодно с несколькими ИИ")
 # st.markdown("This is a header. This is an *extremely* cool app!")
 # st.write(settings_json)
 #
@@ -132,7 +132,7 @@ st.session_state.bot_key = ''
 ADD_BOT = False
 UPLOAD_BOTS = True
 with bots_col:
-    st.markdown("### 🛠️ Боты:")
+    st.markdown("### 🛠️ Роли:")
     if st.session_state.get('bots') is not None:
         for i, bot in enumerate(st.session_state.bots.values()):
             with st.expander(f"{bot['avatar']} {bot['name']}", expanded=bot.get('expanded', False)):
@@ -170,9 +170,9 @@ with bots_col:
                     # reload page:
                     st.experimental_rerun()
 
-    if st.button('Добавить бота ➕'):
+    if st.button('Добавить роль ➕'):
         new_bot = {
-            'name': 'Новый бот ' + str(len(st.session_state.bots) + 1),
+            'name': 'Новая роль ' + str(len(st.session_state.bots) + 1),
             'description': '',
             'temperature': 0.85,
             'model': 'gpt-3.5-turbo-16k',
@@ -191,7 +191,7 @@ with bots_col:
 
     st.divider()
 
-    with st.expander('Выбрать пресет ботов и настроек'):
+    with st.expander('Выбрать пресет ролей и настроек'):
         files = os.listdir(os.path.join('dashboard', 'presets'))
         files_by_name = {}
         for filename in files:
