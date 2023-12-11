@@ -10,7 +10,8 @@ import os
 dotenv.load_dotenv(dotenv.find_dotenv())
 GPT_KEY = os.getenv('GPT_KEY')
 CLAUDE_KEY = os.getenv('CLAUDE_KEY')
-
+if GPT_KEY:
+    openai.api_key = GPT_KEY
 import os
 import sys
 sys.path.append(os.getcwd())
@@ -35,12 +36,17 @@ PROMPT = sp.prompt
 TEMPERATURE = sp.temperature
 DEBUG = sp.debug
 
+
+
 # GPT_TOKENS_LIMIT = 4097 * 0.85  # 4096 is limit, but we need some safe space
 SAFE_SPACE_TOKEN_COEF = 0.95
 GPT_TOKENS_LIMIT = {
+    'gpt-4-1106-preview': 80000,
     'gpt-3.5-turbo': 4096,
     'gpt-3.5-turbo-16k': 16384,
     'gpt-4': 8192,
+    'claude-instant-1': 70000,
+    'claude-2': 70000,
 }.get(MODEL, 4096) * SAFE_SPACE_TOKEN_COEF  # type: ignore
 
 

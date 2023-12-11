@@ -17,10 +17,12 @@ AVATARS = list({
     '👩‍💻', '👨‍💻', '📈', '📊', '🖥️', '💻', '📱', '🧠', '🎯'
 })
 MODELS = [
-    'gpt-3.5-turbo-16k',
-    # 'gpt-4',
     'claude-instant-1',
     'claude-2',
+    'gpt-3.5-turbo',
+    'gpt-3.5-turbo-16k',
+    'gpt-4',
+    'gpt-4-1106-preview',
 ]
 
 SYSTEM_PROMPT = '''{description}.\nПридерживаясь роли "{role}", напиши только одно сообщение от своего имени, учитывая контекст беседы. 
