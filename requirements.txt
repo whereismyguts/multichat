@@ -27,7 +27,7 @@ numpy==1.26.2
 openai==0.27.2
 packaging==23.2
 pandas==2.1.4
-Pillow==10.1.0
+Pillow==10.2.0
 protobuf==4.25.1
 pyarrow==14.0.1
 pydantic==2.5.2
